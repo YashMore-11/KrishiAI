@@ -1,0 +1,8 @@
+0 Tomato_healthy
+1 Tomato_earlyblight
+2 Tomato_lateblight
+3 Potato_healthy
+4 Potato_earlyblight
+5 Potato_lateblight
+6 Corn_healthy
+7 Corn_cercospora
