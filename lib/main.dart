@@ -37,15 +37,22 @@ String tr(String text) {
 }
 
 final Map<String, String> diseaseSolutions = {
-  "corn common rust": "• Apply fungicides containing azoxystrobin.\n• Remove infected leaves immediately.",
-  "corn healthy": "✅ Your plant looks healthy!\n• Keep watering regularly.",
-  "potato earlyblight": "• Apply copper-based fungicides.\n• Water at the base.",
-  "potato lateblight": "⚠️ DANGER: Highly infectious!\n• Destroy infected plants immediately.",
-  "potato healthy": "✅ Your potato plant is healthy!",
-  "tomato earlyblight": "• Prune bottom leaves to improve airflow.\n• Apply fungicide sprays.",
-  "tomato lateblight": "⚠️ DANGER: Severe disease!\n• Remove and destroy affected parts.\n• Avoid overhead watering.",
-  "tomato healthy": "✅ Your tomato plant is vibrant!",
-  "tomato leaf mold": "• Improve ventilation.\n• Avoid wetting leaves when watering.",
+  // --- TOMATO ---
+  "tomato healthy": "✅ Your tomato plant is healthy and vibrant!\n• Keep watering regularly.",
+  "tomato earlyblight": "• Prune bottom leaves to improve airflow.\n• Apply copper-based fungicide sprays.",
+  "tomato lateblight": "⚠️ DANGER: Severe disease!\n• Remove and destroy affected parts immediately.",
+
+  // --- POTATO ---
+  "potato healthy": "✅ Your potato plant is looking great!\n• Maintain proper soil moisture.",
+  "potato earlyblight": "• Rotate crops next season.\n• Use chlorothalonil fungicide.",
+  "potato lateblight": "⚠️ DANGER: Late blight spreads fast!\n• Apply systemic fungicides immediately.",
+
+  // --- CORN ---
+  "corn healthy": "✅ Your corn is growing perfectly!\n• Ensure adequate nitrogen levels.",
+  "corn cercospora": "• (Gray Leaf Spot) Use foliar fungicides.\n• Consider resistant hybrids next season.",
+
+  // --- BACKGROUND CLASS ---
+  "unrecognized object": "Hmm, this doesn't look like a plant I know!\n• Please scan a tomato, potato, or corn leaf."
 };
 
 void main() async {
@@ -54,8 +61,8 @@ void main() async {
   // --- Initialize Supabase ---
   // ⚠️ PASTE YOUR URL AND ANON KEY HERE!
   await Supabase.initialize(
-    url: 'https://cscuvuhnnwfpshwrkjhm.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzY3V2dWhubndmcHNod3JramhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MjY3MjksImV4cCI6MjA4ODIwMjcyOX0.zafR4txilE6K03jlJn3NvlTmi0cOeT2rohSY4ienN-c',
+    url: 'YOUR_SUPABASE_URL_HERE',
+    anonKey: 'YOUR_SUPABASE_ANON_KEY_HERE',
   );
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
@@ -259,7 +266,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final userEmailName = supabase.auth.currentUser?.email?.split('@')[0] ?? "Farmer";
     bool isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return SafeArea(
+    return Scaffold(
+        floatingActionButton: FloatingActionButton.extended(
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ChatbotScreen())),
+            backgroundColor: Colors.green.shade700,
+            icon: const Icon(Icons.chat, color: Colors.white),
+            label: const Text("Ask AI", style: TextStyle(color: Colors.white))
+        ),
+        body: SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -316,7 +330,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-    );
+        ));
   }
 
   Widget _marketCard(BuildContext context, String name, String price, String imageUrl) {
@@ -390,8 +404,8 @@ class _ScannerScreenState extends State<ScannerScreen> {
     } catch (e) { print("Error: $e"); }
   }
 
-  Future<void> _pickImage() async {
-    final image = await ImagePicker().pickImage(source: ImageSource.camera);
+  Future<void> _pickImage(ImageSource source) async {
+    final image = await ImagePicker().pickImage(source: source);
     if (image != null) {
       setState(() { _selectedImage = File(image.path); _isAnalyzing = true; _label = "Analyzing..."; _solution = "";});
       await Future.delayed(const Duration(milliseconds: 200));
@@ -448,7 +462,17 @@ class _ScannerScreenState extends State<ScannerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(tr("Plant Doctor")), centerTitle: true),
+      appBar: AppBar(
+        title: Row(
+          mainAxisSize: MainAxisSize.min, // Keeps it perfectly centered
+          children: [
+            Image.asset('assets/logo.png', height: 35), // Your new logo!
+            const SizedBox(width: 10), // A little space between logo and text
+            Text(tr("Plant Doctor")), // Keeps your original text
+          ],
+        ),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -464,7 +488,34 @@ class _ScannerScreenState extends State<ScannerScreen> {
                 Container(padding: const EdgeInsets.all(20), width: double.infinity, decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(15), border: Border.all(color: Colors.green.shade700)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(tr("Diagnosis & Remedy"), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.green)), const Divider(), Text(_solution, style: const TextStyle(fontSize: 16, height: 1.5))]))
               ]),
             const SizedBox(height: 30),
-            SizedBox(width: double.infinity, height: 55, child: ElevatedButton.icon(onPressed: _pickImage, icon: const Icon(Icons.camera_alt), label: Text(tr("Scan Plant"), style: const TextStyle(fontSize: 18)), style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E7D32), foregroundColor: Colors.white))),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: SizedBox(
+                      height: 55,
+                      child: ElevatedButton.icon(
+                          onPressed: () => _pickImage(ImageSource.camera),
+                          icon: const Icon(Icons.camera_alt),
+                          label: const Text("Camera", style: TextStyle(fontSize: 18)),
+                          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E7D32), foregroundColor: Colors.white)
+                      )
+                  ),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: SizedBox(
+                      height: 55,
+                      child: ElevatedButton.icon(
+                          onPressed: () => _pickImage(ImageSource.gallery),
+                          icon: const Icon(Icons.photo_library),
+                          label: const Text("Gallery", style: TextStyle(fontSize: 18)),
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade700, foregroundColor: Colors.white)
+                      )
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -655,6 +706,118 @@ class ProfileScreen extends StatelessWidget {
             )
           ],
         ),
+      ),
+    );
+  }
+}
+// --- 6. KRISHI AI CHATBOT (MVP VERSION) ---
+class ChatbotScreen extends StatefulWidget {
+  const ChatbotScreen({super.key});
+  @override
+  State<ChatbotScreen> createState() => _ChatbotScreenState();
+}
+
+class _ChatbotScreenState extends State<ChatbotScreen> {
+  final TextEditingController _msgController = TextEditingController();
+  final List<Map<String, String>> _messages = [
+    {"role": "bot", "text": "Hello! I am KrishiAI. Ask me about crop diseases, fertilizers, or weather!"}
+  ];
+
+  void _sendMessage() async {
+    if (_msgController.text.trim().isEmpty) return;
+    String userText = _msgController.text.trim();
+
+    setState(() {
+      _messages.insert(0, {"role": "user", "text": userText});
+      _msgController.clear();
+      _messages.insert(0, {"role": "bot", "text": "Thinking..."});
+    });
+
+    // 1. PASTE YOUR REAL API KEY IN THE QUOTES BELOW
+    String apiKey = "YOUR_API_KEY_HERE".trim();
+
+    try {
+      // 2. UPDATED TO GEMINI 2.5 FLASH!
+      final url = Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey');
+
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "contents": [
+            {
+              "parts": [
+                {"text": "You are KrishiAI, an expert agricultural assistant app for Indian farmers. Keep your answer short, friendly, and strictly related to farming, crops, weather, or agriculture. Answer this: $userText"}
+              ]
+            }
+          ]
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        String botReply = data['candidates'][0]['content']['parts'][0]['text'];
+
+        setState(() {
+          _messages[0] = {"role": "bot", "text": botReply.replaceAll('*', '').trim()};
+        });
+      } else {
+        setState(() {
+          _messages[0] = {"role": "bot", "text": "Oops! Server Error (Status: ${response.statusCode}). Check your API key!"};
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _messages[0] = {"role": "bot", "text": "Network error! Please check your internet connection."};
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("KrishiAI Assistant"), backgroundColor: Colors.green, foregroundColor: Colors.white),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              reverse: true,
+              padding: const EdgeInsets.all(15),
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                bool isUser = _messages[index]["role"] == "user";
+                return Align(
+                  alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(15),
+                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+                    decoration: BoxDecoration(
+                        color: isUser ? Colors.green.shade600 : Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(20).copyWith(
+                          bottomRight: isUser ? const Radius.circular(0) : const Radius.circular(20),
+                          bottomLeft: isUser ? const Radius.circular(20) : const Radius.circular(0),
+                        ),
+                        border: isUser ? null : Border.all(color: Colors.green.shade200)
+                    ),
+                    child: Text(_messages[index]["text"]!, style: TextStyle(color: isUser ? Colors.white : null, fontSize: 16)),
+                  ),
+                );
+              },
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(10),
+            color: Theme.of(context).cardColor,
+            child: Row(
+              children: [
+                Expanded(child: TextField(controller: _msgController, decoration: InputDecoration(hintText: "Ask a farming question...", border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)), contentPadding: const EdgeInsets.symmetric(horizontal: 20)))),
+                const SizedBox(width: 10),
+                CircleAvatar(backgroundColor: Colors.green, radius: 25, child: IconButton(icon: const Icon(Icons.send, color: Colors.white), onPressed: _sendMessage))
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
