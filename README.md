@@ -29,8 +29,7 @@ Agriculture faces massive losses due to undetected crop diseases. Farmers need i
 
 | Home Screen | ML Scanner | AI Chatbot |
 | :---: | :---: | :---: |
-| ![Home]([Insert Link Here]) | ![Scanner]([Insert Link Here]) | ![Chatbot]([Insert Link Here]) |
-
+| <img width="738" height="1600" alt="Home" src="https://github.com/user-attachments/assets/872ef588-b7ea-41c2-a72d-7246658654dd" /> | <img width="738" height="1600" alt="Scan1" src="https://github.com/user-attachments/assets/bd2b0b0b-e2c2-428a-8f1a-59df589189a8" /><br><img width="738" height="1600" alt="Scan2" src="https://github.com/user-attachments/assets/edd4bed8-ea50-4df1-b91d-c95086a2d723" /><br><img width="738" height="1600" alt="Scan3" src="https://github.com/user-attachments/assets/fd403fd1-af2d-4681-965a-0fec819aaf56" /> | <img width="540" height="1170" alt="Chatbot" src="https://github.com/user-attachments/assets/09937b50-7d80-4043-bc76-e573f0a1267b" /> |
 ---
 
 ## 🚀 Getting Started
