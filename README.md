@@ -24,6 +24,30 @@ Agriculture faces massive losses due to undetected crop diseases. Farmers need i
 
 ---
 
+## 🧠 System Architecture
+
+```text
+📱 Flutter Frontend (Cross-Platform UI)
+       │
+       ├─── 🌿 Local Camera Input (Leaf Image)
+       │
+       ▼
+⚙️ Edge ML Processing (Offline)
+       │
+       ├─── 🧠 TensorFlow Lite (MobileNet Architecture)
+       ├─── 🔍 Confidence Scoring & Disease Classification
+       │
+       ▼
+☁️ Cloud AI Integration (Online Expert Advice)
+       │
+       ├─── 🤖 Google Gemini 2.5 Flash API (LLM)
+       ├─── 🌦️ Open-Meteo REST API (Contextual Weather)
+       │
+       ▼
+✅ Final Output -> Offline Diagnosis & Custom Remediation Plan
+
+---
+
 ## 📸 Screenshots
 *(Upload your screenshots to GitHub and put the image links here!)*
 
