@@ -1,3 +1,8 @@
+<p align="center">
+  <img src="assets/logo.png" alt="KrishiAI Logo" width="150"/>
+</p>
+
+
 Agriculture faces massive losses due to undetected crop diseases. Farmers need instant, expert advice at their fingertips, even in areas with low internet connectivity. **KrishiAI** bridges this gap by combining Edge Machine Learning for offline disease detection with Cloud-based Generative AI for expert agricultural consultation.
 
 ---
