@@ -47,4 +47,4 @@ If you want to clone this repository and run it locally, follow these steps:
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/YOUR_GITHUB_USERNAME/KrishiAI.git](https://github.com/YOUR_GITHUB_USERNAME/KrishiAI.git)
+   git clone [https://github.com/YashMore-11/KrishiAI.git](https://github.com/YashMore-11/KrishiAI.git)
