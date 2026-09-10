@@ -43,3 +43,14 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Android local config (machine-specific SDK path)
+android/local.properties
+
+# Keystores (never commit these)
+*.jks
+*.keystore
+key.properties
+android/key.properties 
+
+notepad .gitignore
