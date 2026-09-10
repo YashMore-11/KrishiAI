@@ -11,6 +11,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
+import 'services/news_service.dart';
 
 // --- GLOBAL STATES ---
 final ValueNotifier<String> appLanguage = ValueNotifier<String>('English');
@@ -323,10 +324,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
 
             const SizedBox(height: 25),
-            Text("📰 ${tr('Agriculture News')}", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            _newsCard(context, "Govt Announces New Subsidy", "Farmers to get 50% off on solar pumps...", "2h ago"),
-            _newsCard(context, "Monsoon Update 2026", "Heavy rains expected in your region...", "5h ago"),
+            const LiveNewsSection(),
           ],
         ),
       ),
@@ -362,21 +360,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _newsCard(BuildContext context, String title, String subtitle, String time) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15), padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(15)),
-      child: Row(children: [
-        Container(height: 60, width: 60, decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.article, color: Colors.green)),
-        const SizedBox(width: 15),
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.grey)),
-          Text(time, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-        ]))
-      ]),
-    );
-  }
 }
 
 // --- 2. SCANNER SCREEN ---
@@ -819,6 +802,78 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           )
         ],
       ),
+    );
+  }
+}
+
+class LiveNewsSection extends StatefulWidget {
+  const LiveNewsSection({super.key});
+
+  @override
+  State<LiveNewsSection> createState() => _LiveNewsSectionState();
+}
+
+class _LiveNewsSectionState extends State<LiveNewsSection> {
+  late final Future<List<dynamic>> _newsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _newsFuture = NewsService().fetchAgricultureNews();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<dynamic>>(
+      future: _newsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Text(
+            'News is unavailable offline. Please try again when connected.',
+            style: TextStyle(color: Colors.grey),
+          );
+        }
+
+        final articles = snapshot.data!.take(5).toList();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "📰 ${tr('Agriculture News')}",
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: articles.length,
+              itemBuilder: (context, index) {
+                final article = articles[index] as Map<String, dynamic>;
+                final title = article['title']?.toString() ?? 'Untitled article';
+                final description = article['description']?.toString() ?? '';
+                final source = (article['source'] as Map?)?['name']?.toString() ?? 'Agriculture News';
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    leading: const Icon(Icons.article, color: Colors.green),
+                    title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text(
+                      description.isEmpty ? source : '$description\n$source',
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
